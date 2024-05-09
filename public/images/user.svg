@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Written by Treer (gitlab.com/Treer) -->
+
+<svg
+   version="1.1"
+   width="560"
+   height="560"
+   fill="#ffffff"
+   id="svg4"
+   sodipodi:docname="user.svg"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.95812969"
+     inkscape:cx="306.32596"
+     inkscape:cy="294.84526"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
+  <title
+     id="title1">Abstract user icon</title>
+  <defs
+     id="defs1">
+    <clipPath
+       id="circular-border">
+      <circle
+         cx="300"
+         cy="300"
+         r="280"
+         id="circle1" />
+    </clipPath>
+    <clipPath
+       id="avoid-antialiasing-bugs">
+      <rect
+         width="100%"
+         height="498"
+         id="rect1"
+         x="0"
+         y="0" />
+    </clipPath>
+  </defs>
+  <circle
+     style="fill:#666666;stroke:none;stroke-width:0.972821"
+     id="path1"
+     cx="280"
+     cy="280"
+     r="280" />
+  <circle
+     cx="280"
+     cy="210"
+     r="115"
+     id="circle3"
+     style="fill:#ececec" />
+  <circle
+     cx="300"
+     cy="550"
+     r="205"
+     clip-path="url(#circular-border)"
+     id="circle4"
+     style="fill:#ececec"
+     transform="translate(-20,-20)" />
+</svg>

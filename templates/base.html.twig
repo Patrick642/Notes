@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Notes{% endblock %}</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}">
+    {% block stylesheets %}
+    {% endblock %}
+    {% block javascripts %}
+    {% block importmap %}{{ importmap('app') }}{% endblock %}
+    {% endblock %}
+</head>
+
+<body>
+    {% include 'flash_messages.html.twig' %}
+    {% block body %}{% endblock %}
+</body>
+
+</html>

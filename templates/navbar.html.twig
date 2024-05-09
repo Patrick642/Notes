@@ -1,0 +1,26 @@
+<nav class="navbar navbar-expand-lg fixed-top bg-body-secondary">
+    <div class="container-xl">
+        <a class="navbar-brand" href="{{ path('app_home') }}">
+            <img src="{{ asset('images/logo.svg') }}" height="24">
+        </a>
+        <div class="dropdown">
+            <button class="btn dropdown-toggle border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="{{ asset('images/user.svg') }}" width="38" height="38" class="rounded-circle">
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="{{ path('app_notes') }}" draggable="false">My notes</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{{ path('app_settings') }}" draggable="false">Settings</a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a class="dropdown-item text-danger" href="{{ path('app_logout') }}" draggable="false">Sign out</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

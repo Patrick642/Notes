@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Not found - Notes{% endblock %}
+
+{% block body %}
+<div class="container vh-100 d-flex justify-content-center align-items-center">
+    <div class="text-center">
+        <h1 class="display-1">404</h1>
+        <p>This page doesn't exist.</p>
+        <a href="{{ path('app_home') }}">Go to home page</a>
+    </div>
+</div>
+<style>
+    body {
+        padding: 0;
+    }
+</style>
+{% endblock %}

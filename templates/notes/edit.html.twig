@@ -1,0 +1,28 @@
+<div class="card {{ bg_color ?? 'bg_info' }}">
+    {{ form_start(form_edit_note, {'attr': {'id': 'edit-note'}, 'action': path('app_notes_edit', {'id': note_id }) }) }}
+    <div class="card-header">
+        {{ form_widget(form_edit_note.title) }}
+    </div>
+    <div class="card-body">
+        {{ form_widget(form_edit_note.text) }}
+    </div>
+    <div class="card-footer">
+        <div class="row gap-3">
+            <div class="col d-flex align-items-center">
+                <div class="d-flex flex-row gap-1">
+                    {% for child in form_edit_note.color %}
+                    <label class="note-color-change d-block position-relative">
+                        {{ form_widget(child) }}
+                        <span class="checkmark rounded-circle {{ child.vars.label }}"></span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-12" style="width: max-content">
+                <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" id="edit-note-submit">Edit</button>
+            </div>
+        </div>
+    </div>
+    {{ form_end(form_edit_note) }}
+</div>
