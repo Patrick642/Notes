@@ -9,16 +9,16 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                    <a class="dropdown-item" href="{{ path('app_notes') }}" draggable="false">My notes</a>
+                    <a class="dropdown-item user-select-none" href="{{ path('app_notes') }}" draggable="false">My notes</a>
                 </li>
                 <li>
-                    <a class="dropdown-item" href="{{ path('app_settings') }}" draggable="false">Settings</a>
+                    <a class="dropdown-item user-select-none" href="{{ path('app_settings') }}" draggable="false">Settings</a>
                 </li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
                 <li>
-                    <a class="dropdown-item text-danger" href="{{ path('app_logout') }}" draggable="false">Sign out</a>
+                    <a class="dropdown-item user-select-none text-danger" href="{{ path('app_logout') }}" draggable="false">Sign out</a>
                 </li>
             </ul>
         </div>

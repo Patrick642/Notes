@@ -30,9 +30,7 @@ class SignUpController extends AbstractController
         }
 
         $user = new User();
-
         $form = $this->createForm(SignUpType::class, $user);
-
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

@@ -4,6 +4,7 @@ namespace App\Controller;
 use App\Entity\Note;
 use App\Form\NoteType;
 use App\Repository\NoteRepository;
+use App\Service\FlashMessageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,11 +16,13 @@ class NotesController extends AbstractController
 {
     private $entityManager;
     private $noteRepository;
+    private $flashMessage;
 
-    public function __construct(EntityManagerInterface $entityManager, NoteRepository $noteRepository)
+    public function __construct(EntityManagerInterface $entityManager, NoteRepository $noteRepository, FlashMessageService $flashMessage)
     {
         $this->entityManager = $entityManager;
         $this->noteRepository = $noteRepository;
+        $this->flashMessage = $flashMessage;
     }
 
     #[IsGranted('ROLE_USER')]
@@ -49,7 +52,6 @@ class NotesController extends AbstractController
     public function add(Request $request): Response
     {
         $note = new Note();
-
         $form = $this->createForm(NoteType::class, $note);
         $form->handleRequest($request);
 
@@ -73,7 +75,7 @@ class NotesController extends AbstractController
         $note = $this->noteRepository->find($id);
 
         if ($note->getUserId() !== $this->getUser()->getId()) {
-            $this->addFlash('error', 'You cannot perform this action.');
+            $this->flashMessage->errorUnauthorized();
             return $this->redirectToRoute('app_notes');
         }
 
@@ -96,19 +98,18 @@ class NotesController extends AbstractController
     public function edit(Request $request, int $id): Response
     {
         $note = $this->noteRepository->find($id);
-
         $form = $this->createForm(NoteType::class, $note);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($note->getUserId() !== $this->getUser()->getId()) {
-                $this->addFlash('error', 'You cannot perform this action.');
+                $this->flashMessage->error('You cannot perform this action.');
                 return $this->redirectToRoute('app_notes');
             }
 
             $note->setUpdatedAt(new \DateTimeImmutable());
             $this->entityManager->flush();
-            $this->addFlash('success', 'Note has been edited!');
+            $this->flashMessage->success('Note has been edited!');
         }
 
         return $this->redirectToRoute('app_notes');
@@ -121,14 +122,13 @@ class NotesController extends AbstractController
         $note = $this->noteRepository->find($id);
 
         if ($note->getUserId() !== $this->getUser()->getId()) {
-            $this->addFlash('error', 'You cannot perform this action.');
+            $this->flashMessage->errorUnauthorized();
             return $this->redirectToRoute('app_notes');
         }
 
         $this->entityManager->remove($note);
         $this->entityManager->flush();
-
-        $this->addFlash('success', 'Note has been deleted!');
+        $this->flashMessage->success('Note has been deleted!');
 
         return $this->redirectToRoute('app_notes');
     }

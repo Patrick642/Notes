@@ -7,6 +7,7 @@ use App\Form\ChangePasswordType;
 use App\Form\PasswordResetType;
 use App\Repository\PasswordResetRepository;
 use App\Repository\UserRepository;
+use App\Service\FlashMessageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -22,14 +23,15 @@ class PasswordResetController extends AbstractController
 {
     private $entityManager;
     private $passwordResetRepository;
-
-    /* The number of minutes that the password reset link is valid. For security reasons, this value should not be too high. */
+    private $flashMessage;
+    // The number of minutes that the password reset link is valid. For security reasons, this value should not be too high.
     private const TIME_VALID = 15;
 
-    public function __construct(EntityManagerInterface $entityManager, PasswordResetRepository $passwordResetRepository)
+    public function __construct(EntityManagerInterface $entityManager, PasswordResetRepository $passwordResetRepository, FlashMessageService $flashMessage)
     {
         $this->entityManager = $entityManager;
         $this->passwordResetRepository = $passwordResetRepository;
+        $this->flashMessage = $flashMessage;
     }
 
     #[Route('/password_reset', name: 'app_password_reset')]
@@ -106,12 +108,12 @@ class PasswordResetController extends AbstractController
         $passwordReset = $this->passwordResetRepository->findOneBy(['reset_key' => $key]);
 
         if ($passwordReset === NULL) {
-            $this->addFlash('error', 'The password reset link is invalid.');
+            $this->flashMessage->error('The password reset link is invalid.');
             return $this->redirectToRoute('app_password_reset');
         }
 
         if ($passwordReset->getExpire() < new \DateTimeImmutable()) {
-            $this->addFlash('error', 'The password reset link has expired.');
+            $this->flashMessage->error('The password reset link has expired.');
             return $this->redirectToRoute('app_password_reset');
         }
 
@@ -120,7 +122,7 @@ class PasswordResetController extends AbstractController
         ]);
 
         if ($user === NULL) {
-            $this->addFlash('error', 'The email is not assigned to any account.');
+            $this->flashMessage->error('The email is not assigned to any account.');
             return $this->redirectToRoute('app_password_reset');
         }
 
@@ -129,15 +131,14 @@ class PasswordResetController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($passwordReset->getExpire() < new \DateTimeImmutable()) {
-                $this->addFlash('error', 'The password reset link has expired.');
+                $this->flashMessage->error('The password reset link has expired.');
                 return $this->redirectToRoute('app_password_reset');
             }
 
             $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
             $this->entityManager->remove($passwordReset);
             $this->entityManager->flush();
-
-            $this->addFlash('success', 'The password has been successfully changed! You can now log in to your account with your new password.');
+            $this->flashMessage->success('The password has been successfully changed! You can now log in to your account with your new password.');
 
             return $this->redirectToRoute('app_login');
         }

@@ -1,12 +1,11 @@
 <?php
 namespace App\Controller;
 
-use App\Entity\User;
 use App\Form\ChangeEmailType;
 use App\Form\ChangePasswordType;
+use App\Service\FlashMessageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -17,18 +16,19 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class SettingsController extends AbstractController
 {
     private $entityManager;
+    private $flashMessage;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, FlashMessageService $flashMessage)
     {
         $this->entityManager = $entityManager;
+        $this->flashMessage = $flashMessage;
     }
 
     #[IsGranted('ROLE_USER')]
     #[Route('/settings', name: 'app_settings')]
     public function index(Request $request): Response
     {
-        $user = new User();
-
+        $user = $this->getUser();
         $changeEmailForm = $this->createForm(ChangeEmailType::class, $user);
         $changePasswordForm = $this->createForm(ChangePasswordType::class, $user);
 
@@ -44,13 +44,12 @@ class SettingsController extends AbstractController
     public function changeEmail(Request $request): Response
     {
         $user = $this->getUser();
-
         $form = $this->createForm(ChangeEmailType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->flush();
-            $this->addFlash('success', 'Your email has been changed!');
+            $this->flashMessage->success('Your email has been changed!');
         }
 
         return $this->redirectToRoute('app_settings');
@@ -61,14 +60,14 @@ class SettingsController extends AbstractController
     public function changePassword(Request $request, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         $user = $this->getUser();
-
         $form = $this->createForm(ChangePasswordType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
+            $password = $form->get('password')->getData();
+            $user->setPassword($userPasswordHasher->hashPassword($user, $password));
             $this->entityManager->flush();
-            $this->addFlash('success', 'Your password has been changed!');
+            $this->flashMessage->success('Your password has been changed!');
         }
 
         return $this->redirectToRoute('app_settings');
@@ -79,22 +78,18 @@ class SettingsController extends AbstractController
     public function deleteUser(Request $request, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user = $this->getUser();
-
         $password = $request->request->get('password');
 
         if ($password !== NULL && $passwordHasher->isPasswordValid($user, $password)) {
-
             $session = $request->getSession();
             $session = new Session();
             $session->invalidate();
-
             $this->entityManager->remove($user);
             $this->entityManager->flush();
-
             return $this->redirectToRoute('app_home');
         }
 
-        $this->addFlash('error', 'Wrong password.');
+        $this->flashMessage->success('Wrong password.');
         return $this->redirectToRoute('app_settings');
     }
 }
