@@ -16,7 +16,7 @@ class Note
     #[ORM\Column(name: 'user_id')]
     private ?int $userId = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 60)]
     private ?string $title = null;
 
     #[ORM\Column(length: 255)]

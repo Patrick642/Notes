@@ -13,6 +13,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted('ROLE_USER')]
+#[Route('/settings')]
 class SettingsController extends AbstractController
 {
     private $entityManager;
@@ -24,8 +26,7 @@ class SettingsController extends AbstractController
         $this->flashMessage = $flashMessage;
     }
 
-    #[IsGranted('ROLE_USER')]
-    #[Route('/settings', name: 'app_settings')]
+    #[Route('', name: 'app_settings')]
     public function index(Request $request): Response
     {
         $user = $this->getUser();
@@ -39,8 +40,7 @@ class SettingsController extends AbstractController
         ]);
     }
 
-    #[IsGranted('ROLE_USER')]
-    #[Route('/settings/change_email', name: 'app_settings_change_email')]
+    #[Route('/change_email', name: 'app_settings_change_email')]
     public function changeEmail(Request $request): Response
     {
         $user = $this->getUser();
@@ -55,8 +55,7 @@ class SettingsController extends AbstractController
         return $this->redirectToRoute('app_settings');
     }
 
-    #[IsGranted('ROLE_USER')]
-    #[Route('/settings/change_password', name: 'app_settings_change_password')]
+    #[Route('/change_password', name: 'app_settings_change_password')]
     public function changePassword(Request $request, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         $user = $this->getUser();
@@ -73,8 +72,7 @@ class SettingsController extends AbstractController
         return $this->redirectToRoute('app_settings');
     }
 
-    #[IsGranted('ROLE_USER')]
-    #[Route('/settings/delete_user', name: 'app_settings_delete_user')]
+    #[Route('/delete_user', name: 'app_settings_delete_user')]
     public function deleteUser(Request $request, UserPasswordHasherInterface $passwordHasher): Response
     {
         $user = $this->getUser();
@@ -89,7 +87,7 @@ class SettingsController extends AbstractController
             return $this->redirectToRoute('app_home');
         }
 
-        $this->flashMessage->success('Wrong password.');
+        $this->flashMessage->error('Wrong password.');
         return $this->redirectToRoute('app_settings');
     }
 }

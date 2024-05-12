@@ -17,14 +17,16 @@ class NoteType extends AbstractType
             ->add('title', TextType::class, [
                 'attr' => [
                     'class' => 'w-100 m-0 h5 fw-bold bg-transparent border-0 outline-none',
-                    'placeholder' => 'Type title here...'
+                    'placeholder' => 'Type title here...',
+                    'maxlength' => 60
                 ]
             ])
             ->add('text', TextareaType::class, [
                 'attr' => [
                     'class' => 'note-textarea w-100 bg-transparent border-0 outline-none',
                     'rows' => '7',
-                    'placeholder' => 'Type text here...'
+                    'placeholder' => 'Type text here...',
+                    'maxlength' => 255
                 ]
             ])
             ->add('color', ChoiceType::class, [

@@ -6,7 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class FlashMessageService extends AbstractController
 {
     /**
-     * Create an success message.
+     * Create a success flash message.
      *
      * @param  mixed $message
      * @return void
@@ -17,7 +17,7 @@ class FlashMessageService extends AbstractController
     }
 
     /**
-     * Create an error message.
+     * Create an error flash message.
      *
      * @param  mixed $message
      * @return void
@@ -25,15 +25,5 @@ class FlashMessageService extends AbstractController
     public function error(string $message): void
     {
         $this->addFlash('error', $message);
-    }
-
-    /**
-     * Create an error message informing that the user is not authorized to perform the operation.
-     *
-     * @return void
-     */
-    public function errorUnauthorized(): void
-    {
-        $this->error('You cannot perform this action.');
     }
 }

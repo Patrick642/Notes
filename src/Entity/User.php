@@ -130,11 +130,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function addNote(Note $note): void
-    {
-        $this->notes->add($note);
-    }
-
     /**
      * @see UserInterface
      */

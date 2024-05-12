@@ -13,6 +13,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
+#[Route('/signup')]
 class SignUpController extends AbstractController
 {
     private $entityManager;
@@ -22,12 +23,11 @@ class SignUpController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
-    #[Route('/signup', name: 'app_signup')]
+    #[Route('', name: 'app_signup')]
     public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, AppAuthenticator $appAuthenticator, UserAuthenticatorInterface $userAuthenticator): Response
     {
-        if ($this->getUser()) {
+        if ($this->getUser())
             return $this->redirectToRoute('app_notes');
-        }
 
         $user = new User();
         $form = $this->createForm(SignUpType::class, $user);

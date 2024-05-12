@@ -4,7 +4,7 @@ An application for taking simple notes written in PHP using the Symfony framewor
 ## Requirements
   * PHP 8.2.0 or higher
   * PHP extensions: PDO, SQLite, Ctype, iconv, PCRE, Session, SimpleXML, and Tokenizer
-  * [Database supported by Doctrine][1]
+  * [Database engine supported by Doctrine][1]
   * Mail server
   * Composer
   * Git (optional, if you decide to clone the repository instead of manual downloading)

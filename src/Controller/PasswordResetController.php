@@ -19,6 +19,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
+#[Route('/password_reset')]
 class PasswordResetController extends AbstractController
 {
     private $entityManager;
@@ -34,12 +35,11 @@ class PasswordResetController extends AbstractController
         $this->flashMessage = $flashMessage;
     }
 
-    #[Route('/password_reset', name: 'app_password_reset')]
+    #[Route('', name: 'app_password_reset')]
     public function index(Request $request, MailerInterface $mailer, ManagerRegistry $registry): Response
     {
-        if ($this->getUser()) {
+        if ($this->getUser())
             return $this->redirectToRoute('app_notes');
-        }
 
         $passwordReset = new PasswordReset();
         $user = new UserRepository($registry);
@@ -88,22 +88,20 @@ class PasswordResetController extends AbstractController
         ]);
     }
 
-    #[Route('/password_reset/sent', name: 'app_check_email')]
+    #[Route('/sent', name: 'app_check_email')]
     public function emailSentConfirmation(Request $request): Response
     {
-        if ($this->getUser()) {
+        if ($this->getUser())
             return $this->redirectToRoute('app_notes');
-        }
 
         return $this->render('password_reset/check_email.html.twig');
     }
 
-    #[Route('/password_reset/reset/{key}', name: 'app_password_reset_reset')]
+    #[Route('/reset/{key}', name: 'app_password_reset_reset')]
     public function reset(Request $request, string $key, ManagerRegistry $registry, UserPasswordHasherInterface $userPasswordHasher): Response
     {
-        if ($this->getUser()) {
+        if ($this->getUser())
             return $this->redirectToRoute('app_notes');
-        }
 
         $passwordReset = $this->passwordResetRepository->findOneBy(['reset_key' => $key]);
 

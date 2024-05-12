@@ -30,7 +30,7 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 bg-transparent">
             <div class="card bg-info">
-                {{ form_start(form_add_note, {'attr': {'id' : 'add-note'}}) }}
+                {{ form_start(form_add_note, {'attr': {'id' : 'add-note'}, 'action': path('app_notes_add')}) }}
                 <div class="card-header">
                     {{ form_widget(form_add_note.title) }}
                 </div>

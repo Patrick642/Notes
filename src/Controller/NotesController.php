@@ -9,9 +9,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+#[IsGranted('ROLE_USER')]
+#[Route('/notes')]
 class NotesController extends AbstractController
 {
     private $entityManager;
@@ -25,30 +28,20 @@ class NotesController extends AbstractController
         $this->flashMessage = $flashMessage;
     }
 
-    #[IsGranted('ROLE_USER')]
-    #[Route('/notes', name: 'app_notes')]
+    #[Route('', name: 'app_notes')]
     public function index(Request $request): Response
     {
-        $allNotes = $this->noteRepository->findBy(['userId' => $this->getUser()->getId()]);
+        $allNotes = $this->noteRepository->findBy(['user' => $this->getUser()]);
 
-        $formAddNote = $this->createForm(NoteType::class, options: [
-            'action' => $this->generateUrl('app_notes_add'),
-            'method' => 'POST'
-        ]);
-
-        $formEditNote = $this->createForm(NoteType::class, options: [
-            'method' => 'POST'
-        ]);
+        $formAddNote = $this->createForm(NoteType::class);
 
         return $this->render('notes/index.html.twig', [
             'form_add_note' => $formAddNote,
-            'form_edit_note' => $formEditNote,
             'notes' => $allNotes
         ]);
     }
 
-    #[IsGranted('ROLE_USER')]
-    #[Route('/notes/add', name: 'app_notes_add')]
+    #[Route('/add', name: 'app_notes_add')]
     public function add(Request $request): Response
     {
         $note = new Note();
@@ -68,21 +61,23 @@ class NotesController extends AbstractController
         return $this->redirectToRoute('app_notes');
     }
 
-    #[IsGranted('ROLE_USER')]
-    #[Route('/notes/get_note/{id}', name: 'notes_get')]
+    #[Route('/get_edit_form/{id}', name: 'app_get_edit_form')]
     public function get(Request $request, int $id): Response
     {
+        if (!$request->isXmlHttpRequest())
+            throw new AccessDeniedHttpException();
+
         $note = $this->noteRepository->find($id);
 
-        if ($note->getUserId() !== $this->getUser()->getId()) {
-            $this->flashMessage->errorUnauthorized();
-            return $this->redirectToRoute('app_notes');
+        if ($note->getUser() !== $this->getUser()) {
+            return $this->json(['success' => false]);
         }
 
         $form = $this->createForm(NoteType::class, $note);
 
-        return $this->json(
-            $this->renderView(
+        return $this->json([
+            'success' => true,
+            'edit_form' => $this->renderView(
                 'notes/edit.html.twig',
                 [
                     'form_edit_note' => $form,
@@ -90,11 +85,10 @@ class NotesController extends AbstractController
                     'bg_color' => $note->getColor()
                 ]
             )
-        );
+        ]);
     }
 
-    #[IsGranted('ROLE_USER')]
-    #[Route('/notes/edit/{id}', name: 'app_notes_edit')]
+    #[Route('/edit/{id}', name: 'app_notes_edit')]
     public function edit(Request $request, int $id): Response
     {
         $note = $this->noteRepository->find($id);
@@ -102,10 +96,8 @@ class NotesController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($note->getUserId() !== $this->getUser()->getId()) {
-                $this->flashMessage->error('You cannot perform this action.');
-                return $this->redirectToRoute('app_notes');
-            }
+            if ($note->getUser() !== $this->getUser())
+                throw new AccessDeniedHttpException();
 
             $note->setUpdatedAt(new \DateTimeImmutable());
             $this->entityManager->flush();
@@ -115,16 +107,13 @@ class NotesController extends AbstractController
         return $this->redirectToRoute('app_notes');
     }
 
-    #[IsGranted('ROLE_USER')]
-    #[Route('/notes/delete/{id}', name: 'app_notes_delete')]
+    #[Route('/delete/{id}', name: 'app_notes_delete')]
     public function delete(Request $request, int $id): Response
     {
         $note = $this->noteRepository->find($id);
 
-        if ($note->getUserId() !== $this->getUser()->getId()) {
-            $this->flashMessage->errorUnauthorized();
-            return $this->redirectToRoute('app_notes');
-        }
+        if ($note->getUser() !== $this->getUser())
+            throw new AccessDeniedHttpException();
 
         $this->entityManager->remove($note);
         $this->entityManager->flush();
