@@ -22,7 +22,7 @@ class FlashMessageService extends AbstractController
      * @param  mixed $message
      * @return void
      */
-    public function error(string $message): void
+    public function error(mixed $message): void
     {
         $this->addFlash('error', $message);
     }

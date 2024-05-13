@@ -6,17 +6,15 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    const ROLE_USER = 'ROLE_USER';
+    public const ROLE_USER = 'ROLE_USER';
+    public const MIN_PASSWORD_LENGTH = 6;
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -137,14 +135,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
-    }
-
-    public static function loadValidatorMetadata(ClassMetadata $metadata): void
-    {
-        $metadata->addConstraint(new UniqueEntity(['fields' => 'email', 'message' => 'This email is assigned to an existing account. Try using another one.']));
-        $metadata->addPropertyConstraint('email', new Assert\NotBlank(['message' => 'Email field cannot be empty.']));
-        $metadata->addPropertyConstraint('email', new Assert\Email(['message' => 'The email "{{ value }}" is not a valid email.']));
-        $metadata->addPropertyConstraint('password', new Assert\NotBlank(['message' => 'Password field cannot be empty.']));
-        $metadata->addPropertyConstraint('password', new Assert\Length(['min' => 6, 'minMessage' => 'Your password must be at least {{ limit }} characters long.']));
     }
 }

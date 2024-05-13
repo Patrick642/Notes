@@ -47,9 +47,15 @@ class SettingsController extends AbstractController
         $form = $this->createForm(ChangeEmailType::class, $user);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-            $this->flashMessage->success('Your email has been changed!');
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $this->entityManager->flush();
+                $this->flashMessage->success('Your email has been changed!');
+            } else {
+                $errors = $form->getErrors(true);
+                $this->flashMessage->error($errors[0]->getMessage());
+            }
+            $this->entityManager->refresh($user);
         }
 
         return $this->redirectToRoute('app_settings');
@@ -62,11 +68,17 @@ class SettingsController extends AbstractController
         $form = $this->createForm(ChangePasswordType::class, $user);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $password = $form->get('password')->getData();
-            $user->setPassword($userPasswordHasher->hashPassword($user, $password));
-            $this->entityManager->flush();
-            $this->flashMessage->success('Your password has been changed!');
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $password = $form->get('password')->getData();
+                $user->setPassword($userPasswordHasher->hashPassword($user, $password));
+                $this->entityManager->flush();
+                $this->flashMessage->success('Your password has been changed!');
+            } else {
+                $errors = $form->getErrors(true);
+                $this->flashMessage->error($errors[0]->getMessage());
+            }
+            $this->entityManager->refresh($user);
         }
 
         return $this->redirectToRoute('app_settings');

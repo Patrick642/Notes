@@ -8,6 +8,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class NoteType extends AbstractType
 {
@@ -18,7 +20,13 @@ class NoteType extends AbstractType
                 'attr' => [
                     'class' => 'w-100 m-0 h5 fw-bold bg-transparent border-0 outline-none',
                     'placeholder' => 'Type title here...',
-                    'maxlength' => 60
+                    'maxlength' => Note::MAX_TITLE_LENGTH
+                ],
+                'constraints' => [
+                    new NotBlank(),
+                    new Length([
+                        'max' => Note::MAX_TITLE_LENGTH
+                    ])
                 ]
             ])
             ->add('text', TextareaType::class, [
@@ -26,7 +34,13 @@ class NoteType extends AbstractType
                     'class' => 'note-textarea w-100 bg-transparent border-0 outline-none',
                     'rows' => '7',
                     'placeholder' => 'Type text here...',
-                    'maxlength' => 255
+                    'maxlength' => Note::MAX_TEXT_LENGTH
+                ],
+                'constraints' => [
+                    new NotBlank(),
+                    new Length([
+                        'max' => Note::MAX_TEXT_LENGTH
+                    ])
                 ]
             ])
             ->add('color', ChoiceType::class, [
@@ -45,7 +59,10 @@ class NoteType extends AbstractType
                         return ['checked' => 'checked'];
                     }
                     return [];
-                }
+                },
+                'constraints' => [
+                    new NotBlank()
+                ]
             ])
         ;
     }
@@ -53,7 +70,7 @@ class NoteType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Note::class,
+            'data_class' => Note::class
         ]);
     }
 }

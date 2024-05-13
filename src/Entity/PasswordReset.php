@@ -4,8 +4,6 @@ namespace App\Entity;
 
 use App\Repository\PasswordResetRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 #[ORM\Entity(repositoryClass: PasswordResetRepository::class)]
 class PasswordReset
@@ -70,11 +68,5 @@ class PasswordReset
         $this->expire = $expire;
 
         return $this;
-    }
-
-    public static function loadValidatorMetadata(ClassMetadata $metadata): void
-    {
-        $metadata->addPropertyConstraint('email', new Assert\NotBlank(['message' => 'Email field cannot be empty.']));
-        $metadata->addPropertyConstraint('email', new Assert\Email(['message' => 'The email "{{ value }}" is not a valid email.']));
     }
 }

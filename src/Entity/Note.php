@@ -8,18 +8,21 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: NoteRepository::class)]
 class Note
 {
+    public const MAX_TITLE_LENGTH = 60;
+    public const MAX_TEXT_LENGTH = 255;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(name: 'user_id')]
-    private ?int $userId = null;
+    #[ORM\ManyToOne(inversedBy: 'notes')]
+    private User $user;
 
-    #[ORM\Column(length: 60)]
+    #[ORM\Column(length: self::MAX_TITLE_LENGTH)]
     private ?string $title = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: self::MAX_TEXT_LENGTH)]
     private ?string $text = null;
 
     #[ORM\Column(length: 32)]
@@ -27,9 +30,6 @@ class Note
 
     #[ORM\Column(name: 'updated_at')]
     private ?\DateTimeImmutable $updatedAt = null;
-
-    #[ORM\ManyToOne(inversedBy: 'notes')]
-    private User $user;
 
     public function getId(): ?int
     {
@@ -43,15 +43,14 @@ class Note
         return $this;
     }
 
-    public function getUserId(): ?int
+    public function getUser(): User
     {
-        return $this->userId;
+        return $this->user;
     }
 
-    public function setUserId(int $userId): static
+    public function setUser(User $user): static
     {
-        $this->userId = $userId;
-
+        $this->user = $user;
         return $this;
     }
 
@@ -100,17 +99,6 @@ class Note
     {
         $this->updatedAt = $updatedAt;
 
-        return $this;
-    }
-
-    public function getUser(): User
-    {
-        return $this->user;
-    }
-
-    public function setUser(User $user): self
-    {
-        $this->user = $user;
         return $this;
     }
 }
