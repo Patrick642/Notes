@@ -60,7 +60,9 @@ MAILER_DSN=smtp://user:pass@smtp.example.com:port
 
 More about configuring Mailer [here][3]
 
-**8.** If you change the environment from `dev` to `prod` (you can do it in the `.env` file), you also need to compile the assets:
+**8.** Set up sender details `config/packages/mailer.yaml`
+
+**9.** If you change the environment from `dev` to `prod` (you can do it in the `.env` file), you also need to compile the assets:
 
 ```
 php bin/console asset-map:compile
