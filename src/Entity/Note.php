@@ -16,8 +16,8 @@ class Note
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'notes')]
-    private User $user;
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'notes')]
+    private ?User $user = null;
 
     #[ORM\Column(length: self::MAX_TITLE_LENGTH)]
     private ?string $title = null;
