@@ -1,92 +1,100 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}My notes - Notes{% endblock %}
+{% block title %}
+	My notes - Notes
+{% endblock %}
 
 {% block body %}
 
-{% include 'navbar.html.twig' %}
+	{% include 'navbar.html.twig' %}
 
-<div class="container">
-    <button class="add-button position-fixed bg-success rounded-circle border-0 shadow" data-bs-toggle="modal" data-bs-target="#modal-add-note">
-        <svg class="icon icon-tabler" width="24" height="24" viewBox="0 0 24 24">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M12 5l0 14" />
-            <path d="M5 12l14 0" />
-        </svg>
-    </button>
-    <div class="row notes-container" data-controller="masonry">
-        <div class="no-notes-info text-center">
-            <h1 class="text-secondary">You don't have any notes yet</h1>
-            <h5 class="text-secondary">Click on the green rounded button at the bottom of the screen to add your first note.</h5>
-        </div>
-        {% for note in notes %}
-        {% include 'notes/note.html.twig' %}
-        {% endfor %}
-    </div>
-</div>
+	<div class="container">
+		<button class="add-button position-fixed bg-success rounded-circle border-0 shadow" data-bs-toggle="modal" data-bs-target="#modal-add-note">
+			<svg class="icon icon-tabler" width="24" height="24" viewbox="0 0 24 24">
+				<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+				<path d="M12 5l0 14"/>
+				<path d="M5 12l14 0"/>
+			</svg>
+		</button>
+		{% if notes is empty %}
+			<div class="col text-center">
+				<h1 class="text-secondary">You don't have any notes yet</h1>
+				<h5 class="text-secondary">Click on the green rounded button at the bottom of the screen to add your first note.</h5>
+			</div>
+		{% else %}
+			<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3 mb-3 notes-container" data-controller="masonry">
+				{% for note in notes %}
+					{% include 'notes/note.html.twig' %}
+				{% endfor %}
+			</div>
+			{% if userHasMoreNotes == true %}
+				<div class="col d-flex justify-content-center align-items-center mb-3">
+					<button class="btn btn-lg btn-primary" data-controller="infinite-scroll" data-action="click->infinite-scroll#load" data-url="{{ path('app_notes_get_more') }}" id="infiniteScrollButton">Load more notes</button>
+				</div>
+			{% endif %}
+		{% endif %}
+	</div>
 
-<!-- Add note modal -->
-<div class="modal" id="modal-add-note" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 bg-transparent">
-            <div class="card bg-info">
-                {{ form_start(form_add_note, {'attr': {'id' : 'add-note'}, 'action': path('app_notes_add')}) }}
-                <div class="card-header">
-                    {{ form_widget(form_add_note.title) }}
-                </div>
-                <div class="card-body">
-                    {{ form_widget(form_add_note.text) }}
-                </div>
-                <div class="card-footer">
-                    <div class="row gap-3">
-                        <div class="col d-flex align-items-center">
-                            <div class="d-flex flex-row gap-1">
-                                {% for child in form_add_note.color %}
-                                <label class="note-color-change d-block position-relative">
-                                    {{ form_widget(child) }}
-                                    <span class="checkmark rounded-circle {{ child.vars.label }}"></span>
-                                </label>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="col-12" style="width: max-content">
-                            <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Add</button>
-                        </div>
-                    </div>
-                </div>
-                {{ form_end(form_add_note) }}
-            </div>
-        </div>
-    </div>
-</div>
+	<!-- Add note modal -->
+	<div class="modal" id="modal-add-note" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content border-0 bg-transparent">
+				<div class="card bg-info">
+					{{ form_start(formAddNote, {'attr': {'id' : 'add-note'}, 'action': path('app_notes_add')}) }}
+					<div class="card-header">
+						{{ form_widget(formAddNote.title) }}
+					</div>
+					<div class="card-body">
+						{{ form_widget(formAddNote.text) }}
+					</div>
+					<div class="card-footer">
+						<div class="row gap-3">
+							<div class="col d-flex align-items-center">
+								<div class="d-flex flex-row gap-1">
+									{% for child in formAddNote.color %}
+										<label class="note-color-change d-block position-relative">
+											{{ form_widget(child) }}
+											<span class="checkmark rounded-circle {{ child.vars.label }}"></span>
+										</label>
+									{% endfor %}
+								</div>
+							</div>
+							<div class="col-12" style="width: max-content">
+								<button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+								<button type="submit" class="btn btn-primary">Add</button>
+							</div>
+						</div>
+					</div>
+					{{ form_end(formAddNote) }}
+				</div>
+			</div>
+		</div>
+	</div>
 
-<!-- Edit bote modal -->
-<div class="modal" id="modal-edit-note" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 bg-transparent">
+	<!-- Edit bote modal -->
+	<div class="modal" id="modal-edit-note" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content border-0 bg-transparent"></div>
+		</div>
+	</div>
 
-        </div>
-    </div>
-</div>
-
-<!-- Delete note modal -->
-<div class="modal" id="modal-delete-note" tabindex="-1" aria-labelledby="modal-delete-note-label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h1 class="modal-title fs-5" id="modal-delete-note-label">Delete note</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Do you really want delete this note?
-                <form id="delete-note" method="POST" action=""></form>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
-                <button type="submit" form="delete-note" class="btn btn-danger">Delete</button>
-            </div>
-        </div>
-    </div>
-</div>
+	<!-- Delete note modal -->
+	<div class="modal" id="modal-delete-note" tabindex="-1" aria-labelledby="modal-delete-note-label" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header border-0">
+					<h1 class="modal-title fs-5" id="modal-delete-note-label">Delete note</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					Do you really want delete this note?
+					<form id="delete-note" method="POST" action=""></form>
+				</div>
+				<div class="modal-footer border-0">
+					<button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+					<button type="submit" form="delete-note" class="btn btn-danger">Delete</button>
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}

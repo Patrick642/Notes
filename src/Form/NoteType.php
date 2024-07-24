@@ -55,10 +55,11 @@ class NoteType extends AbstractType
                 'expanded' => true,
                 'multiple' => false,
                 'choice_attr' => function ($choice, $key, $value) use ($options) {
-                    if (empty ($options['data']->color) && 'bg-info' == $value) {
-                        return ['checked' => 'checked'];
+                    $attr = ['data-controller' => 'modal-note', 'data-action' => 'change->modal-note#changeColor'];
+                    if (empty($options['data']->color) && 'bg-info' == $value) {
+                        return array_merge($attr, ['checked' => 'checked']);
                     }
-                    return [];
+                    return $attr;
                 },
                 'constraints' => [
                     new NotBlank()

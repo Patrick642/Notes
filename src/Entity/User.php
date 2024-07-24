@@ -42,6 +42,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'joined_at')]
     private ?\DateTimeImmutable $joinedAt = null;
 
+    /**
+     * @var bool Is user email verified
+     */
+    #[ORM\Column]
+    private ?bool $isVerified = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -49,6 +55,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(targetEntity: Note::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $notes;
+
+    #[ORM\OneToMany(targetEntity: EmailVerification::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $emailVerifications;
+
+    #[ORM\OneToMany(targetEntity: PasswordReset::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $passwordResets;
 
     public function __construct()
     {
@@ -135,5 +147,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    public function getIsVerified(): ?bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): static
+    {
+        $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getNotes(): Collection
+    {
+        return $this->notes;
+    }
+
+    public function getEmailVerifications(): Collection
+    {
+        return $this->emailVerifications;
+    }
+
+    public function getPasswordResets(): Collection
+    {
+        return $this->passwordResets;
     }
 }

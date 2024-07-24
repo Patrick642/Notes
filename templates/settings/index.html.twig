@@ -1,127 +1,130 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Settings - Notes{% endblock %}
+{% block title %}
+	Settings - Notes
+{% endblock %}
 
 {% block body %}
 
-{% include 'navbar.html.twig' %}
+	{% include 'navbar.html.twig' %}
 
-<div class="container">
-    <h3>Settings</h3>
-    <div class="card my-4 rounded-4">
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item p-3">
-                <div class="d-flex flex-row justify-content-between">
-                    <div class="d-flex flex-column justify-content-center gap-2">
-                        <text>Your email address:</text>
-                        <text>
-                            {{ email }}
-                        </text>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <button class="btn text-primary" data-bs-toggle="modal" data-bs-target="#modal-change-email">Change
-                            email</button>
-                    </div>
-                </div>
-            </li>
-            <li class="list-group-item p-3">
-                <div class="d-flex flex-row justify-content-between">
-                    <div class="d-flex flex-column justify-content-center">
-                        <text>Your password</text>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <button class="btn text-primary" data-bs-toggle="modal" data-bs-target="#modal-change-password">Change password</button>
-                    </div>
-                </div>
-            </li>
-            <li class="list-group-item p-3">
-                <div class="d-flex flex-row justify-content-between">
-                    <div class="d-flex flex-column justify-content-center">
-                        <text>Deleting account</text>
-                    </div>
-                    <div class="d-flex flex-column">
-                        <button class="btn text-danger" data-bs-toggle="modal" data-bs-target="#modal-delete-user">Delete</button>
-                    </div>
-                </div>
-            </li>
-        </ul>
-    </div>
-</div>
+	<div class="container">
+		<h3>Settings</h3>
+		<div class="card my-4 rounded-4">
+			<ul class="list-group list-group-flush">
+				<li class="list-group-item p-3">
+					<div class="d-flex flex-row justify-content-between">
+						<div class="d-flex flex-column justify-content-center gap-2">
+							<text>Your email address:</text>
+							<text>
+								{{ email }}
+							</text>
+						</div>
+						<div class="d-flex align-items-center">
+							<button class="btn text-primary" data-bs-toggle="modal" data-bs-target="#modal-change-email">Change</button>
+						</div>
+					</div>
+				</li>
+				<li class="list-group-item p-3">
+					<div class="d-flex flex-row justify-content-between">
+						<div class="d-flex flex-column justify-content-center">
+							<text>Your password</text>
+						</div>
+						<div class="d-flex align-items-center">
+							<button class="btn text-primary" data-bs-toggle="modal" data-bs-target="#modal-change-password">Change</button>
+						</div>
+					</div>
+				</li>
+				<li class="list-group-item p-3">
+					<div class="d-flex flex-row justify-content-between">
+						<div class="d-flex flex-column justify-content-center">
+							<text>Deleting account</text>
+						</div>
+						<div class="d-flex flex-column">
+							<button class="btn text-danger" data-bs-toggle="modal" data-bs-target="#modal-delete-user">Delete</button>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div>
 
-<!-- Change user email modal -->
-<div class="modal" id="modal-change-email" tabindex="-1" aria-labelledby="modal-change-email-label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h1 class="modal-title fs-5" id="modal-change-email-label">Change your email address</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                {{ form_start(form_change_email, {'attr': {'id' : 'form-change-email'}, 'action': path('app_settings_change_email') }) }}
-                <div class="form-floating">
-                    {{ form_widget(form_change_email.email) }}
-                    {{ form_label(form_change_email.email) }}
-                </div>
-                {{ form_end(form_change_email) }}
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
-                <button type="submit" form="form-change-email" class="btn btn-success">Save</button>
-            </div>
-        </div>
-    </div>
-</div>
+	<!-- Change user email modal -->
+	<div class="modal" id="modal-change-email" tabindex="-1" aria-labelledby="modal-change-email-label" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header border-0">
+					<h1 class="modal-title fs-5" id="modal-change-email-label">Change your email address</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					{{ form_start(formChangeEmail, {'attr': {'id' : 'form-change-email'}, 'action': path('app_settings_change_email') }) }}
+					<div class="form-floating">
+						{{ form_widget(formChangeEmail.email) }}
+						{{ form_label(formChangeEmail.email) }}
+					</div>
+					{{ form_end(formChangeEmail) }}
+				</div>
+				<div class="modal-footer border-0">
+					<button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+					<button type="submit" form="form-change-email" class="btn btn-success">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
-<!-- Change user password modal -->
-<div class="modal" id="modal-change-password" tabindex="-1" aria-labelledby="modal-change-password-label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h1 class="modal-title fs-5" id="modal-change-password-label">Change your account password</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                {{ form_start(form_change_password, {'attr': {'id' : 'form-change-password'}, 'action': path('app_settings_change_password') }) }}
-                <div class="form-floating mb-3">
-                    {{ form_widget(form_change_password.password.first) }}
-                    {{ form_label(form_change_password.password.first) }}
-                </div>
-                <div class="form-floating mb-3">
-                    {{ form_widget(form_change_password.password.second) }}
-                    {{ form_label(form_change_password.password.second) }}
-                </div>
-                {{ form_end(form_change_password) }}
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
-                <button type="submit" form="form-change-password" class="btn btn-success">Save</button>
-            </div>
-        </div>
-    </div>
-</div>
+	<!-- Change user password modal -->
+	<div class="modal" id="modal-change-password" tabindex="-1" aria-labelledby="modal-change-password-label" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header border-0">
+					<h1 class="modal-title fs-5" id="modal-change-password-label">Change your account password</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					{{ form_start(formChangePassword, {'attr': {'id' : 'form-change-password'}, 'action': path('app_settings_change_password') }) }}
+					<div class="form-floating mb-3">
+						{{ form_widget(formChangePassword.password.first) }}
+						{{ form_label(formChangePassword.password.first) }}
+					</div>
+					<div class="form-floating mb-3">
+						{{ form_widget(formChangePassword.password.second) }}
+						{{ form_label(formChangePassword.password.second) }}
+					</div>
+					{{ form_end(formChangePassword) }}
+				</div>
+				<div class="modal-footer border-0">
+					<button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+					<button type="submit" form="form-change-password" class="btn btn-success">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
-<!-- Delete user modal -->
-<div class="modal" id="modal-delete-user" tabindex="-1" aria-labelledby="modal-delete-user-label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h1 class="modal-title fs-5" id="modal-delete-user-label">Delete this account</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete your account? All your saved notes will be deleted forever. <b>You can't undo this action.</b> Confirm your decision by entering your password.</p>
-                <form method="POST" action="{{ path('app_settings_delete_user') }}" id="form-delete-user">
-                    <div class="form-floating">
-                        <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
-                        <label for="password" class="form-label">Password:</label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn" data-bs-dismiss="modal">Close</button>
-                <button type="submit" form="form-delete-user" class="btn btn-danger">Delete account</button>
-            </div>
-        </div>
-    </div>
-</div>
+	<!-- Delete user modal -->
+	<div class="modal" id="modal-delete-user" tabindex="-1" aria-labelledby="modal-delete-user-label" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header border-0">
+					<h1 class="modal-title fs-5" id="modal-delete-user-label">Delete this account</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<p>Are you sure you want to delete your account? All your saved notes will be deleted forever.
+						<b>You can't undo this action.</b>
+						Confirm your decision by entering your password.</p>
+					<form method="POST" action="{{ path('app_settings_delete_user') }}" id="form-delete-user">
+						<div class="form-floating">
+							<input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+							<label for="password" class="form-label">Password:</label>
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer border-0">
+					<button type="button" class="btn" data-bs-dismiss="modal">Close</button>
+					<button type="submit" form="form-delete-user" class="btn btn-danger">Delete account</button>
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}

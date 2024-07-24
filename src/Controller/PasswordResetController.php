@@ -5,16 +5,15 @@ use App\Entity\PasswordReset;
 use App\Entity\User;
 use App\Form\ChangePasswordType;
 use App\Form\PasswordResetType;
-use App\Repository\PasswordResetRepository;
-use App\Repository\UserRepository;
+use App\Service\EmailSendingService;
 use App\Service\FlashMessageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,17 +21,14 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/password_reset')]
 class PasswordResetController extends AbstractController
 {
-    private $entityManager;
-    private $passwordResetRepository;
-    private $flashMessage;
-    // The number of minutes that the password reset link is valid. For security reasons, this value should not be too high.
-    private const TIME_VALID = 15;
+    // The number of seconds that the password reset link is valid.
+    private const TIME_VALID = 15 * 60;
 
-    public function __construct(EntityManagerInterface $entityManager, PasswordResetRepository $passwordResetRepository, FlashMessageService $flashMessage)
-    {
-        $this->entityManager = $entityManager;
-        $this->passwordResetRepository = $passwordResetRepository;
-        $this->flashMessage = $flashMessage;
+    public function __construct(
+        private EntityManagerInterface $em,
+        private FlashMessageService $flashMessage,
+        private EmailSendingService $emailSending
+    ) {
     }
 
     #[Route('', name: 'app_password_reset')]
@@ -41,46 +37,25 @@ class PasswordResetController extends AbstractController
         if ($this->getUser())
             return $this->redirectToRoute('app_notes');
 
-        $passwordReset = new PasswordReset();
-        $user = new UserRepository($registry);
-        $form = $this->createForm(PasswordResetType::class, $passwordReset);
+        $form = $this->createForm(PasswordResetType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $email = $form->get('email')->getData();
+            $user = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
 
-            if ($user->findOneBy(['email' => $email]) !== null) {
-                $resetKey = substr(bin2hex(random_bytes(128)), 0, 255);
+            if ($user !== null) {
+                $this->emailSending->passwordResetRequest(
+                    $request,
+                    $user,
+                    self::TIME_VALID
+                );
 
-                $passwordReset->setEmail($email)
-                    ->setResetKey($resetKey)
-                    ->setExpire(new \DateTimeImmutable('+' . self::TIME_VALID . ' minutes'))
-                ;
-
-                $resetLink = $request->getSchemeAndHttpHost() . $this->generateUrl('app_password_reset_reset', [
-                    'key' => $resetKey
-                ]);
-
-                $this->entityManager->persist($passwordReset);
-                $this->entityManager->flush();
-
-                $email = (new TemplatedEmail)
-                    ->to($email)
-                    ->subject('Reset your password')
-                    ->textTemplate('emails/password_reset.txt.twig')
-                    ->htmlTemplate('emails/password_reset.html.twig')
-                    ->context([
-                        'base_url' => $request->getSchemeAndHttpHost(),
-                        'reset_link' => $resetLink,
-                        'time_valid' => self::TIME_VALID
-                    ])
-                ;
-
-                $mailer->send($email);
-                return $this->redirectToRoute('app_check_email');
+                $request->getSession()->getFlashBag()->add('reset_password_email', $email);
+                return $this->redirectToRoute('app_password_reset_email_sent');
             }
 
-            $form->addError(new FormError('The email address provided is not associated with any account.'));
+            $form->addError(new FormError('The email address provided is not associated with any account'));
         }
 
         return $this->render('password_reset/index.html.twig', [
@@ -88,62 +63,75 @@ class PasswordResetController extends AbstractController
         ]);
     }
 
-    #[Route('/sent', name: 'app_check_email')]
+    #[Route('/email_sent', name: 'app_password_reset_email_sent')]
     public function emailSentConfirmation(Request $request): Response
     {
         if ($this->getUser())
             return $this->redirectToRoute('app_notes');
 
-        return $this->render('password_reset/check_email.html.twig');
+        $email = $request->getSession()->getFlashBag()->get('reset_password_email')[0] ?? null;
+
+        if ($email === null)
+            throw new NotFoundHttpException();
+
+        return $this->render('password_reset/email_sent.html.twig', [
+            'email' => $email
+        ]);
     }
 
-    #[Route('/reset/{key}', name: 'app_password_reset_reset')]
-    public function reset(Request $request, string $key, ManagerRegistry $registry, UserPasswordHasherInterface $userPasswordHasher): Response
+    #[Route('/reset/success', name: 'app_password_reset_success')]
+    public function success(Request $request): Response
+    {
+        $success = $request->getSession()->getFlashBag()->get('password_changed')[0] ?? null;
+
+        if ($success === null)
+            throw new NotFoundHttpException();
+
+        return $this->render('password_reset/success.html.twig');
+    }
+
+    #[Route('/verify/{authKey}', name: 'app_password_reset_verify')]
+    public function reset(Request $request, string $authKey, ManagerRegistry $registry, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         if ($this->getUser())
             return $this->redirectToRoute('app_notes');
 
-        $passwordReset = $this->passwordResetRepository->findOneBy(['reset_key' => $key]);
+        $passwordReset = $this->em->getRepository(PasswordReset::class)->findOneBy(['authKey' => $authKey]);
 
         if ($passwordReset === NULL) {
-            $this->flashMessage->error('The password reset link is invalid.');
+            $this->flashMessage->error('The password reset link is invalid');
             return $this->redirectToRoute('app_password_reset');
         }
 
-        if ($passwordReset->getExpire() < new \DateTimeImmutable()) {
-            $this->flashMessage->error('The password reset link has expired.');
+        if ($passwordReset->getExpiresAt() < new \DateTimeImmutable()) {
+            $this->flashMessage->error('The password reset link has expired');
             return $this->redirectToRoute('app_password_reset');
         }
 
-        $user = $this->entityManager->getRepository(User::class)->findOneBy([
-            'email' => $passwordReset->getEmail(),
-        ]);
-
-        if ($user === NULL) {
-            $this->flashMessage->error('The email is not assigned to any account.');
-            return $this->redirectToRoute('app_password_reset');
-        }
+        $user = $passwordReset->getUser();
 
         $form = $this->createForm(ChangePasswordType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($passwordReset->getExpire() < new \DateTimeImmutable()) {
-                $this->flashMessage->error('The password reset link has expired.');
-                return $this->redirectToRoute('app_password_reset');
-            }
+            $user->setPassword(
+                $userPasswordHasher->hashPassword(
+                    $user,
+                    $form->get('password')->getData()
+                )
+            );
 
-            $user->setPassword($userPasswordHasher->hashPassword($user, $form->get('password')->getData()));
-            $this->entityManager->remove($passwordReset);
-            $this->entityManager->flush();
-            $this->flashMessage->success('The password has been successfully changed! You can now log in to your account with your new password.');
+            $this->em->remove($passwordReset);
+            $this->em->flush();
 
-            return $this->redirectToRoute('app_login');
+            $request->getSession()->getFlashBag()->add('password_changed', '');
+
+            return $this->redirectToRoute('app_password_reset_success');
         }
 
         return $this->render('password_reset/reset.html.twig', [
             'form' => $form,
-            'email' => $passwordReset->getEmail()
+            'email' => $passwordReset->getUser()->getEmail()
         ]);
     }
 }

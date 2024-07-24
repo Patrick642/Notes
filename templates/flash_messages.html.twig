@@ -1,11 +1,11 @@
 {% for message in app.flashes('success') %}
-<div class="flash-message fixed-top mx-auto mt-5 alert alert-success shadow fade show" role="alert" data-controller="flash">
-    {{ message }}
-</div>
+	<div class="flash-message fixed-top mx-auto mt-5 alert alert-success shadow fade show" role="alert" data-controller="flash">
+		{{ message }}
+	</div>
 {% endfor %}
 
 {% for message in app.flashes('error') %}
-<div class="flash-message fixed-top mx-auto mt-5 alert alert-danger shadow fade show" role="alert" data-controller="flash">
-    {{ message }}
-</div>
+	<div class="flash-message fixed-top mx-auto mt-5 alert alert-danger shadow fade show" role="alert" data-controller="flash">
+		{{ message }}
+	</div>
 {% endfor %}

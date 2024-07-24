@@ -3,7 +3,6 @@ namespace App\Controller;
 
 use App\Entity\Note;
 use App\Form\NoteType;
-use App\Repository\NoteRepository;
 use App\Service\FlashMessageService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,33 +10,34 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[IsGranted('ROLE_USER')]
 #[Route('/notes')]
 class NotesController extends AbstractController
 {
-    private $entityManager;
-    private $noteRepository;
-    private $flashMessage;
+    private const MAX_NOTES_PER_PAGE = 20;
+    private const NOTES_RENDER_ORDER_FIELD = 'updatedAt';
+    private const NOTES_RENDER_ORDER_SORT = 'DESC';
 
-    public function __construct(EntityManagerInterface $entityManager, NoteRepository $noteRepository, FlashMessageService $flashMessage)
-    {
-        $this->entityManager = $entityManager;
-        $this->noteRepository = $noteRepository;
-        $this->flashMessage = $flashMessage;
+    public function __construct(
+        private EntityManagerInterface $em,
+        private FlashMessageService $flashMessage
+    ) {
     }
 
     #[Route('', name: 'app_notes')]
     public function index(Request $request): Response
     {
-        $allNotes = $this->noteRepository->findBy(['user' => $this->getUser()]);
+        if (!$this->getUser()->getIsVerified())
+            return $this->redirectToRoute('app_signup_email_sent');
+
+        $allNotes = $this->em->getRepository(Note::class)->findBy(['user' => $this->getUser()], [self::NOTES_RENDER_ORDER_FIELD => self::NOTES_RENDER_ORDER_SORT], self::MAX_NOTES_PER_PAGE);
 
         $formAddNote = $this->createForm(NoteType::class);
 
         return $this->render('notes/index.html.twig', [
-            'form_add_note' => $formAddNote,
-            'notes' => $allNotes
+            'formAddNote' => $formAddNote,
+            'notes' => $allNotes,
+            'userHasMoreNotes' => ($this->getUserNoteCount() > self::MAX_NOTES_PER_PAGE) ? true : false
         ]);
     }
 
@@ -54,20 +54,17 @@ class NotesController extends AbstractController
                 ->setUpdatedAt(new \DateTimeImmutable())
             ;
 
-            $this->entityManager->persist($note);
-            $this->entityManager->flush();
+            $this->em->persist($note);
+            $this->em->flush();
         }
 
         return $this->redirectToRoute('app_notes');
     }
 
-    #[Route('/get_edit_form/{id}', name: 'app_get_edit_form')]
+    #[Route('/get_edit_form/{id}', name: 'app_notes_get_edit_form', condition: 'request.isXmlHttpRequest()')]
     public function get(Request $request, int $id): Response
     {
-        if (!$request->isXmlHttpRequest())
-            throw new AccessDeniedHttpException();
-
-        $note = $this->noteRepository->find($id);
+        $note = $this->em->getRepository(Note::class)->find($id);
 
         if ($note->getUser() !== $this->getUser()) {
             return $this->json(['success' => false]);
@@ -77,12 +74,12 @@ class NotesController extends AbstractController
 
         return $this->json([
             'success' => true,
-            'edit_form' => $this->renderView(
+            'formEdit' => $this->renderView(
                 'notes/edit.html.twig',
                 [
-                    'form_edit_note' => $form,
-                    'note_id' => $note->getId(),
-                    'bg_color' => $note->getColor()
+                    'formEditNote' => $form,
+                    'noteId' => $note->getId(),
+                    'bgColor' => $note->getColor()
                 ]
             )
         ]);
@@ -91,7 +88,7 @@ class NotesController extends AbstractController
     #[Route('/edit/{id}', name: 'app_notes_edit')]
     public function edit(Request $request, int $id): Response
     {
-        $note = $this->noteRepository->find($id);
+        $note = $this->em->getRepository(Note::class)->find($id);
         $form = $this->createForm(NoteType::class, $note);
         $form->handleRequest($request);
 
@@ -100,7 +97,7 @@ class NotesController extends AbstractController
                 throw new AccessDeniedHttpException();
 
             $note->setUpdatedAt(new \DateTimeImmutable());
-            $this->entityManager->flush();
+            $this->em->flush();
             $this->flashMessage->success('Note has been edited!');
         }
 
@@ -110,15 +107,59 @@ class NotesController extends AbstractController
     #[Route('/delete/{id}', name: 'app_notes_delete')]
     public function delete(Request $request, int $id): Response
     {
-        $note = $this->noteRepository->find($id);
+        $note = $this->em->getRepository(Note::class)->find($id);
 
         if ($note->getUser() !== $this->getUser())
             throw new AccessDeniedHttpException();
 
-        $this->entityManager->remove($note);
-        $this->entityManager->flush();
+        $this->em->remove($note);
+        $this->em->flush();
         $this->flashMessage->success('Note has been deleted!');
 
         return $this->redirectToRoute('app_notes');
+    }
+
+    // More notes for infinite scroll.
+    #[Route('/getmore', name: 'app_notes_get_more', condition: 'request.isXmlHttpRequest()')]
+    public function getMore(Request $request): Response
+    {
+        $offset = $request->query->get('offset');
+        $limit = self::MAX_NOTES_PER_PAGE;
+        $render = '';
+
+        $notes = $this->em->getRepository(Note::class)->createQueryBuilder('n')
+            ->where('n.user=:user')
+            ->setParameter('user', $this->getUser())
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->orderBy('n.' . self::NOTES_RENDER_ORDER_FIELD, self::NOTES_RENDER_ORDER_SORT)
+            ->getQuery()
+            ->getResult()
+        ;
+
+        foreach ($notes as $note) {
+            $render .= $this->renderView('notes/note.html.twig', [
+                'note' => $note
+            ]);
+        }
+
+        return $this->json([
+            'success' => true,
+            'render' => $render,
+            'isLast' => ($this->getUserNoteCount() <= $offset + self::MAX_NOTES_PER_PAGE) ? true : false
+        ]);
+    }
+
+    private function getUserNoteCount(): int
+    {
+        $count = $this->em->getRepository(Note::class)->createQueryBuilder('n')
+            ->select('COUNT(n.id)')
+            ->where('n.user=:user')
+            ->setParameter('user', $this->getUser())
+            ->getQuery()
+            ->getSingleScalarResult()
+        ;
+
+        return $count;
     }
 }

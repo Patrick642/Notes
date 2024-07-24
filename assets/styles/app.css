@@ -22,10 +22,6 @@ body {
     width: 500px;
 }
 
-.no-notes-info:not(:only-child) {
-    display: none;
-}
-
 .add-button {
     bottom: 32px;
     right: 32px;

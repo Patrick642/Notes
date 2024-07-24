@@ -29,7 +29,7 @@ class ChangeEmailType extends AbstractType
                         'message' => 'Please enter an email',
                     ]),
                     new Email([
-                        'message' => '"{{ value }}" is not a valid email'
+                        'message' => '{{ value }} is not a valid email'
                     ])
                 ]
             ])

@@ -1,20 +1,26 @@
 <!DOCTYPE html>
-<html data-bs-theme="dark">
+<html lang="en" data-bs-theme="dark">
 
-<head>
-    <meta charset="UTF-8">
-    <title>{% block title %}Notes{% endblock %}</title>
-    <link rel="icon" href="{{ asset('images/favicon.ico') }}">
-    {% block stylesheets %}
-    {% endblock %}
-    {% block javascripts %}
-    {% block importmap %}{{ importmap('app') }}{% endblock %}
-    {% endblock %}
-</head>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>
+			{% block title %}
+				Notes
+			{% endblock %}
+		</title>
+		<link rel="icon" type="image/x-icon" href="{{ asset('images/favicon.ico') }}">
+        {% block stylesheets %}{% endblock %}
+		{% block javascripts %}
+			{% block importmap %}
+				{{ importmap('app') }}
+			{% endblock %}
+		{% endblock %}
+	</head>
 
-<body>
-    {% include 'flash_messages.html.twig' %}
-    {% block body %}{% endblock %}
-</body>
+	<body>
+		{% include 'flash_messages.html.twig' %}
+		{% block body %}{% endblock %}
+	</body>
 
 </html>
