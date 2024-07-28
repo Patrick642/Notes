@@ -16,7 +16,7 @@ class PasswordReset
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'passwordResets')]
     private ?User $user = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $authKey = null;
 
     #[ORM\Column]
