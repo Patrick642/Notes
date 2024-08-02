@@ -8,7 +8,7 @@
 
 	{% include 'navbar.html.twig' %}
 
-	<div class="container">
+	<div class="container" data-controller="infinite-scroll" data-action="scroll@window->infinite-scroll#scroll">
 		<button class="add-button position-fixed bg-success rounded-circle border-0 shadow" data-bs-toggle="modal" data-bs-target="#modal-add-note">
 			<svg class="icon icon-tabler" width="24" height="24" viewbox="0 0 24 24">
 				<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -28,8 +28,11 @@
 				{% endfor %}
 			</div>
 			{% if userHasMoreNotes == true %}
-				<div class="col d-flex justify-content-center align-items-center mb-3">
-					<button class="btn btn-lg btn-primary" data-controller="infinite-scroll" data-action="click->infinite-scroll#load" data-url="{{ path('app_notes_get_more') }}" id="infiniteScrollButton">Load more notes</button>
+				<input type="hidden" data-url="{{ path('app_notes_get_more') }}" id="infiniteScrollData">
+				<div class="d-flex justify-content-center my-4 d-none" id="infiniteScrollSpinner">
+					<div class="spinner-border" role="status">
+						<span class="visually-hidden">Loading...</span>
+					</div>
 				</div>
 			{% endif %}
 		{% endif %}
