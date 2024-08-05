@@ -1,5 +1,8 @@
 # Notes
-An application for taking simple notes written in PHP using the Symfony framework. 
+An application for taking simple notes written in PHP using the Symfony framework.
+
+## Demo
+🔗[Demo version of the application](https://notes-demo.free.nf)
 
 ## Requirements
   * PHP 8.2.0 or higher
