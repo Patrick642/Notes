@@ -65,10 +65,24 @@ More about configuring Mailer [here][3]
 
 **8.** Set up sender details `config/packages/mailer.yaml`
 
-**9.** If you change the environment from `dev` to `prod` (you can do it in the `.env` file), you also need to compile the assets:
+**9.** If you change the environment from `dev` to `prod` (you can do it in the `.env` file):
+
+You need to compile the assets:
 
 ```
 php bin/console asset-map:compile
+```
+
+And to compile .env files for production use:
+
+```
+composer dump-env prod
+```
+
+After everything is done, it is necessary to clear the cache, otherwise errors may occur:
+
+```
+php bin/console cache:clear
 ```
 
 [1]: https://www.doctrine-project.org/projects/doctrine-dbal/en/4.0/reference/introduction.html
