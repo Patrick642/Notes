@@ -27,9 +27,6 @@ class NotesController extends AbstractController
     #[Route('', name: 'app_notes')]
     public function index(Request $request): Response
     {
-        if (!$this->getUser()->getIsVerified())
-            return $this->redirectToRoute('app_signup_email_sent');
-
         $allNotes = $this->em->getRepository(Note::class)->findBy(['user' => $this->getUser()], [self::NOTES_RENDER_ORDER_FIELD => self::NOTES_RENDER_ORDER_SORT], self::MAX_NOTES_PER_PAGE);
 
         $formAddNote = $this->createForm(NoteType::class);

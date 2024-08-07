@@ -56,12 +56,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Note::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $notes;
 
-    #[ORM\OneToMany(targetEntity: EmailVerification::class, mappedBy: 'user', orphanRemoval: true)]
-    private Collection $emailVerifications;
-
-    #[ORM\OneToMany(targetEntity: PasswordReset::class, mappedBy: 'user', orphanRemoval: true)]
-    private Collection $passwordResets;
-
     public function __construct()
     {
         $this->notes = new ArrayCollection();
@@ -164,15 +158,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getNotes(): Collection
     {
         return $this->notes;
-    }
-
-    public function getEmailVerifications(): Collection
-    {
-        return $this->emailVerifications;
-    }
-
-    public function getPasswordResets(): Collection
-    {
-        return $this->passwordResets;
     }
 }

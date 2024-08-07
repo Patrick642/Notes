@@ -1,7 +1,0 @@
-framework:
-    mailer:
-        dsn: '%env(MAILER_DSN)%'
-        envelope:
-            sender: 'notes@example.com'
-        headers:
-            From: 'Notes <notes@example.com>'
